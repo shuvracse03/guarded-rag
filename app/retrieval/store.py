@@ -19,11 +19,19 @@ class VectorStore:
     def __init__(self, persist_dir: str | None = None):
         if persist_dir:
             self._client = chromadb.PersistentClient(path=persist_dir)
-            name = "documents"
+            self._name = "documents"
         else:
             self._client = chromadb.EphemeralClient()
-            name = f"documents-{uuid.uuid4().hex[:12]}"  # isolate in-memory instances from each other
-        self._col = self._client.get_or_create_collection(name, metadata={"hnsw:space": "cosine"})
+            self._name = f"documents-{uuid.uuid4().hex[:12]}"  # isolate in-memory instances from each other
+
+    @property
+    def _col(self):
+        # Looked up on every call: another process (e.g. `app.seed --reset`) may recreate the
+        # collection, and a cached handle would then point at a deleted collection id.
+        return self._client.get_or_create_collection(self._name, metadata={"hnsw:space": "cosine"})
+
+    def reset(self) -> None:
+        self._client.delete_collection(self._name)
 
     def add_chunks(self, ids, texts, embeddings, metas) -> None:
         self._col.add(ids=ids, documents=texts, embeddings=embeddings, metadatas=metas)

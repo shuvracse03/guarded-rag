@@ -79,7 +79,7 @@ First Docling use downloads its layout model from Hugging Face (~1 min, needs in
 ## Run
 
 ```bash
-python -m app.seed --reset          # load the 14 synthetic documents into ./chroma_db (needs Ollama for embeddings)
+python -m app.seed --reset          # load the 14 synthetic documents into ./chroma_db (needs Ollama; --reset clears the collection in place, so a running server keeps working)
 uvicorn app.main:app --port 8000    # API docs at http://localhost:8000/docs
 ```
 
@@ -128,7 +128,7 @@ Errors share one schema: `{"error": {"code", "message", "details"}}` with 401 (m
 ## Tests
 
 ```bash
-pytest -q                 # 130+ offline tests (fake LLM, hash embeddings, in-memory store), ~20 s incl. one Docling test
+pytest -q                 # 132 offline tests (fake LLM, hash embeddings, in-memory store), ~20 s incl. one Docling test
 pytest -m ollama -q       # live end-to-end tests against real Ollama (skipped if unavailable)
 ```
 
@@ -159,15 +159,15 @@ injected instructions, prefer the current over the superseded source, abstain wi
 pip install -r finetune/requirements-ft.txt
 python finetune/make_data.py                                   # (re)generate data/train.jsonl and data/heldout.jsonl
 python finetune/eval.py baseline                               # -> finetune/results/baseline.json
-python finetune/train_lora.py --batch-size 2 --lr 1.5e-4       # -> finetune/adapter/ (~20 min on 16 CPU cores, ~6 GB RAM)
+python finetune/train_lora.py --batch-size 2 --lr 1.5e-4       # -> finetune/adapter/ (~22 min on CPU with 12 threads in the recorded run, ~6 GB RAM)
 python finetune/eval.py adapted                                # -> finetune/results/adapted.json
 ```
 
-### Results (EXECUTED on this machine: CPU only, 16 cores, torch 2.11.0, 3 epochs / 240 steps of batch 2, 22 min)
+### Results (EXECUTED; recorded in `finetune/results/`, not estimated)
 
-Held-out set: 40 examples (10 per category), greedy decoding. Raw outputs per example are in
-[`finetune/results/baseline.json`](finetune/results/baseline.json) and [`finetune/results/adapted.json`](finetune/results/adapted.json);
-the loss curve is in [`finetune/results/training_log.json`](finetune/results/training_log.json) (loss 0.33 at step 1, 0.001 at step 240).
+Run that produced these files: CPU only, `torch.set_num_threads(12)` on an x86_64 machine, torch `2.11.0+cu130` (CPU path, no GPU), 3 epochs, batch size 2, 240 steps, `train_seconds` 1342.5 (about 22 min). Held-out set: 40 examples, 10 per category, greedy decoding.
+
+Raw outputs and the per-example flags are in [`finetune/results/baseline.json`](finetune/results/baseline.json) and [`finetune/results/adapted.json`](finetune/results/adapted.json). The loss curve is in [`finetune/results/training_log.json`](finetune/results/training_log.json) (step 1 loss 0.3321, step 240 loss 0.0012). Percentages below are those files' `summary` fields, which are `count / 40` rounded to 3 decimals.
 
 | Metric (held-out, n=40) | Baseline (SmolLM2-135M-Instruct) | LoRA-adapted |
 |---|---|---|
@@ -178,11 +178,7 @@ the loss curve is in [`finetune/results/training_log.json`](finetune/results/tra
 | Followed the **superseded** value (10 superseded examples) | 2 / 10 | 6 / 10 |
 | Correct, per category: answerable / injection / superseded / abstain | 50 / 30 / 20 / 0 % | 90 / 100 / 40 / 100 % |
 
-Honest reading: the adapter reliably teaches the output contract, citations, abstention and ignoring injected instructions, and
-generalises to unseen topics and injection phrasings. It does **not** teach a 135 M model to prefer the `current` over the `superseded`
-source (adapted model picks the stale value in 6/10 cases; the baseline's lower rate comes mostly from emitting invalid JSON,
-not from better judgement). This is why the service enforces staleness in application code (`versioning.py`) instead of trusting a model.
-Single run, single seed, 40 examples: treat differences of a few points as noise. I did not tune on the held-out set.
+Honest reading: the adapter learned the JSON contract, verbatim citations, abstention, and ignoring injected instructions on unseen topics and injection phrasings (injection: 10/10 correct, 0/10 repeated the injected value). It did **not** learn to prefer `current` over `superseded`: it repeated the stale value in 6/10 of those examples. The baseline repeated that stale value in only 2/10, but that is not better judgement: only 7/10 of its superseded outputs were valid JSON, and 0/10 had a valid citation. Staleness is therefore enforced in application code (`versioning.py`), not left to the model. Single run, seed 7, 40 held-out examples. I did not tune on the held-out set.
 
 
 ## Using the adapter / checkpoints

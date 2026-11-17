@@ -1,7 +1,6 @@
 """Load the synthetic corpus: `python -m app.seed [--reset]`."""
 import argparse
 import json
-import shutil
 from pathlib import Path
 
 from app.auth import Principal
@@ -32,12 +31,12 @@ def seed(service: IngestService, settings, data_dir: Path = DATA) -> list:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--reset", action="store_true", help="delete the existing vector store first")
+    parser.add_argument("--reset", action="store_true", help="delete the existing documents collection first")
     args = parser.parse_args()
     settings = get_settings()
-    if args.reset:
-        shutil.rmtree(settings.chroma_dir, ignore_errors=True)
     c = Container(settings)
+    if args.reset:
+        c.store.reset()  # not rmtree: deleting the folder would break a server that is already running
     for r in seed(c.ingest, settings):
         print(f"{r.doc_id:14} tenant={r.tenant:13} chunks={r.chunks} parser={r.parser:7} flagged={r.injection_flagged_chunks}")
 
