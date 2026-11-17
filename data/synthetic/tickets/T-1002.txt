@@ -1,0 +1,4 @@
+Subject: CSV export stuck on pending
+Customer: Acme Freight (synthetic) | Priority: high | Opened: 2025-09-12
+
+Our nightly CSV export has been in the "pending" state since yesterday and finally failed with error EXP-504. We need the file for a customs audit. Support asked us to retry once the worker is restarted; the retry also failed with EXP-504.

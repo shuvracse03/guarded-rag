@@ -1,0 +1,5 @@
+2025-09-12T01:00:03Z INFO  retention_job tenant=acme-freight started policy=KB-RET-002
+2025-09-12T01:00:41Z INFO  retention_job tenant=acme-freight purged 1182 shipment records older than 180 days
+2025-09-12T01:00:42Z INFO  retention_job tenant=acme-freight finished without errors
+2025-09-12T09:14:10Z ERROR export_worker tenant=acme-freight job=exp-88412 error=EXP-504 gateway certificate rejected
+2025-09-12T09:14:55Z WARN  export_worker tenant=acme-freight queue depth 640 above threshold 500

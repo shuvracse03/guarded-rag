@@ -1,0 +1,14 @@
+# Runtime + test dependencies (versions verified on Python 3.12.15, Linux x86_64, CPU only)
+fastapi==0.141.1
+uvicorn==0.52.4
+pydantic==2.13.4
+pydantic-settings==2.16.3
+python-multipart==0.0.26
+httpx==0.28.1
+chromadb==1.5.7
+docling==2.150.1
+pypdf==6.10.0
+reportlab==4.4.10
+numpy==2.5.5
+pytest==9.2.0
+pytest-asyncio==1.5.0

@@ -1,0 +1,4 @@
+2025-09-16T08:02:11Z INFO  ingest file=BULL-2025-09.pdf tenant=acme-freight size=3.1KB uploaded_by=unregistered_sender
+2025-09-16T08:02:12Z WARN  ingest file=BULL-2025-09.pdf trailing bytes after %%EOF; xref table repaired
+2025-09-16T08:02:13Z WARN  ingest file=BULL-2025-09.pdf not signed by Records Office; marked unverified
+2025-09-16T08:02:14Z INFO  ingest file=BULL-2025-09.pdf pages=2 chunks=4

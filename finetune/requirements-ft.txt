@@ -1,0 +1,7 @@
+# Extra dependencies for the LoRA demo (on top of ../requirements.txt)
+# Verified with Python 3.12.15, CPU-only torch.
+torch==2.11.0
+transformers==5.8.0
+peft==0.21.3
+accelerate==1.13.0
+datasets==4.8.4

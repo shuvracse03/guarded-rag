@@ -1,0 +1,4 @@
+Subject: How long do you keep our shipment records?
+Customer: Acme Freight (synthetic) | Priority: low | Opened: 2025-09-10
+
+Hello, our auditors asked how long Northwind keeps our shipment records and delivery receipts after delivery. Could you confirm the retention period so we can put it in our compliance file?
